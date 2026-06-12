@@ -1,11 +1,3 @@
-// ============================================================
-// i2c_top.v — 24512A EEPROM Write + Readback
-// Write 0xA5 to address 0x0010, read back, compare
-// Success : LD0-LD3 all ON
-// Mismatch: RGB red all ON
-// NACK err: LD0 blinks (ack_error latched)
-// ============================================================
-
 module i2c_top(
     input        clk,
     input        btn0,      // RST   — D9
@@ -26,7 +18,6 @@ wire [7:0] read_data;
 reg        verify_ok;
 reg        verify_fail;
 
-// ── Debounce RST (btn0) ──────────────────────────────────────
 reg [19:0] rst_cnt;
 reg        rst_clean;
 
@@ -50,8 +41,6 @@ begin
         end
     end
 end
-
-// ── Debounce START (btn1) ────────────────────────────────────
 reg [20:0] db_cnt;
 reg        btn1_clean;
 reg        btn1_prev;
@@ -99,8 +88,7 @@ begin
             verify_fail <= 1;
     end
 end
-
-// ── Master instantiation ─────────────────────────────────────
+    
 master u_master (
     .clk        (clk),
     .rst        (rst_clean),
@@ -115,10 +103,6 @@ master u_master (
     .busy       (busy)
 );
 
-// ── LEDs ─────────────────────────────────────────────────────
-// All 4 LEDs ON  = write+read verified OK
-// All 4 RGB red  = data mismatch
-// LD0 only       = busy (transaction in progress)
 assign led   = verify_ok   ? 4'b1111 :
                busy        ? 4'b0001 : 4'b0000;
 
