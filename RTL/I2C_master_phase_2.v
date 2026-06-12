@@ -1,13 +1,3 @@
-// ============================================================
-// master.v — 24512A EEPROM I2C Master (FINAL CORRECT VERSION)
-// Protocol:
-// WRITE PHASE:
-//   START → 0xA0+ACK → ADDR_HI+ACK → ADDR_LO+ACK → DATA+ACK → STOP
-//   WAIT 5ms
-// READ PHASE:
-//   START → 0xA0+ACK → ADDR_HI+ACK → ADDR_LO+ACK → REP-START
-//   → 0xA1+ACK → DATA(from EEPROM) → NACK → STOP
-// ============================================================
 
 module master(
     input            clk,
@@ -99,10 +89,6 @@ begin
         done        <= 0;
 
         case (state)
-
-        // =========================================================
-        // IDLE
-        // =========================================================
         IDLE:
         begin
             scl_en      <= 0;
@@ -118,12 +104,6 @@ begin
                 state       <= START;
             end
         end
-
-        // =========================================================
-        // WRITE PHASE
-        // =========================================================
-
-        // ── START condition ───────────────────────────────────────
         START:
         begin
             case (clk_div)
@@ -258,7 +238,6 @@ begin
         end
 
         // ── STOP (write) ──────────────────────────────────────────
-        // SCL releases HIGH first, then SDA releases HIGH
         STOP_W:
         begin
             case (clk_div)
@@ -280,10 +259,6 @@ begin
                 state       <= START2;
             end
         end
-
-        // =========================================================
-        // READ PHASE — new START, resend full address, then REP-START
-        // =========================================================
 
         // ── New START ─────────────────────────────────────────────
         START2:
@@ -390,7 +365,7 @@ begin
         end
 
         // ── Repeated START ────────────────────────────────────────
-        // SDA falls while SCL is HIGH
+
         REP_START:
         begin
             case (clk_div)
